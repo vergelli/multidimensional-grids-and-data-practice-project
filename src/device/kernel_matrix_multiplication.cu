@@ -1,6 +1,17 @@
 #include <cuda_runtime.h>
+//! Version de codigo sacado de ejemplo del libro en pagina 64
 
-//TODO: revisar kernel
+/**
+ * Kernel convencional de CUDA para la multiplicación de dos matrices A y B,
+ * almacenando el resultado en la matriz C.
+ * 
+//@param A Puntero a la matriz A.
+//@param B Puntero a la matriz B.
+//@param C Puntero a la matriz C donde se almacenará el resultado.
+//@param rowsA Número de filas de la matriz A.
+//@param colsA Número de columnas de la matriz A y número de filas de la matriz B.
+//@param colsB Número de columnas de la matriz B.
+**/
 __global__ void matrixMulKernel(float* A, float* B, float* C, int rowsA, int colsA, int colsB) {
     int row = blockIdx.y * blockDim.y + threadIdx.y;
     int col = blockIdx.x * blockDim.x + threadIdx.x;

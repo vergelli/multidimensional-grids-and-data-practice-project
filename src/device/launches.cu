@@ -1,7 +1,37 @@
 #include <cuda_runtime.h>
-#include "matrix_multiplication_kernel.cu"
-#include "launch_config.cuh"
+#include "kernel_matrix_multiplication.cu"
+#include "launches.cuh"
+#include <vector>
 
-void multiplyMatrices(float* h_A, float* h_B, float* h_C, int rowsA, int colsA, int colsB) {
-    //TODO: Definir
+using namespace std;
+
+void multiplyMatrices(vector<float> A_matrix,
+                      vector<float> B_matrix,
+                      int rowsA, int colsA,
+                      int rowsB, int colsB){
+
+    std::vector<float> C_matrix(rowsA * colsB);
+
+    float *dA_matrix, *dB_matrix, *dC_matrix;
+
+    unsigned int A_matrix_dim = rowsA * colsA;
+    unsigned int B_matrix_dim = rowsB * colsB;
+    unsigned int C_matrix_dim = rowsA * colsB;
+
+    cudaMalloc(&dA_matrix, A_matrix_dim * sizeof(float));
+    cudaMalloc(&dB_matrix, B_matrix_dim * sizeof(float));
+    cudaMalloc(&dC_matrix, C_matrix_dim * sizeof(float));
+
+    cudaMemcpy(dA_matrix, 
+               A_matrix.data(), 
+               A_matrix_dim * sizeof(float), 
+               cudaMemcpyHostToDevice);
+
+    cudaMemcpy(dB_matrix, 
+               B_matrix.data(), 
+               B_matrix_dim * sizeof(float), 
+               cudaMemcpyHostToDevice);
+
+    //TODO: Seguir a partir de donde dejé.
+
 }
