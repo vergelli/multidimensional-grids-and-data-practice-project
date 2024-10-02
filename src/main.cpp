@@ -11,7 +11,7 @@
 #include "matrix_io.hpp"
 #include "config.hpp"
 #include "validations.hpp"
-
+#include "launches.cuh"
 using namespace std;
 
 /**
@@ -33,8 +33,11 @@ int main() {
     cout << "Intentando abrir matriz B" << endl;
     std::pair<std::vector<float>, std::pair<size_t, size_t>> resultB = readMatrixFromFile(MATRIX_B_FILE_PATH);
 
+    cout << "Guardando valores de la matriz A" << endl;
     std::vector<float> A_matrix = resultA.first;
     std::pair<size_t, size_t> dimensionsA = resultA.second;
+
+    cout << "Guardando valores de la matriz B" << endl;
     std::vector<float> B_matrix = resultB.first;
     std::pair<size_t, size_t> dimensionsB = resultB.second;
 
@@ -50,8 +53,9 @@ int main() {
 
     if (is_matrix_product_permitted(colsA, rowsB)) {
         std::cout << "Las matrices se pueden multiplicar." << std::endl;
-        //TODO: llamar a la función de multiplicación de matrices
-        //TODO multiplyMatrices(h_A, h_B, h_C, rowsA, colsA, colsB);
+        std::cout << "Llamndo al Kernel" << std::endl;
+        multiplyMatrices(A_matrix, B_matrix, rowsA, colsA, rowsB, colsB);
+
     } else {
         std::cout << "Las matrices no se pueden multiplicar." << std::endl;
         return 1;
