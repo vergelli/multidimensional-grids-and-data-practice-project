@@ -11,9 +11,7 @@
 #include "matrix_io.hpp"
 #include "config.hpp"
 #include "validations.hpp"
-#include "device/launches.cuh"
-
-
+#include "launches.cuh"
 using namespace std;
 
 /**
@@ -56,8 +54,7 @@ int main() {
     if (is_matrix_product_permitted(colsA, rowsB)) {
         std::cout << "Las matrices se pueden multiplicar." << std::endl;
         std::cout << "Llamndo al Kernel" << std::endl;
-
-        //* multiplyMatrices(A_matrix, B_matrix, rowsA, colsA, rowsB, colsB);
+        multiplyMatrices(A_matrix, B_matrix, rowsA, colsA, rowsB, colsB);
 
     } else {
         std::cout << "Las matrices no se pueden multiplicar." << std::endl;
