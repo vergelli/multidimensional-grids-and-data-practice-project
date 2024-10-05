@@ -10,6 +10,8 @@
 #include <string>
 #include <fstream>
 #include <iostream>
+#include <sstream>
+
 using namespace std;
 
 /**
@@ -57,3 +59,47 @@ std::pair<std::vector<float>, std::pair<size_t, size_t>> readMatrixFromFile(cons
 
     return {matrix, {rows, cols}};
 }
+
+
+void writeKernelDataToCSV(const KernelData& data) {
+    std::string fileName = generateFileName(data);
+
+    //TODO: Me lo esta guardando en la raiz, cuando deberia guardarlo en DATA.
+
+    std::ofstream csvFile(fileName, std::ios::app); // Usa el nombre dinámico
+
+    //TODO: Me esta escribiendo la cabecera cada vez que apendea una estructura.
+
+    // Si el archivo está vacío, escribe el encabezado
+    if (csvFile.tellp() == 0) {
+        csvFile << "A_matrix_rows,A_matrix_cols,B_matrix_rows,B_matrix_cols,"
+                << "C_matrix_rows,C_matrix_cols,exec_time_ms,"
+                << "free_mem_MB_before,free_mem_MB_after,"
+                << "gridDimX,gridDimY,gridDimZ,blockDimX,blockDimY,blockDimZ,FLOPs,FLOPs_per_second" << std::endl;
+    }
+
+    // Escribe los datos del kernel en el archivo CSV
+    csvFile << data.rowsA << "," << data.colsA << ","
+            << data.rowsB << "," << data.colsB << ","
+            << data.rowsC << "," << data.colsC << ","
+            << data.executionTime << ","
+            << data.freeMemBefore / (1024.0 * 1024.0) << "," // Convierte bytes a MB
+            << data.freeMemAfter / (1024.0 * 1024.0) << ","
+            << data.gridDimX << "," << data.gridDimY << "," << data.gridDimZ << ","
+            << data.blockDimX << "," << data.blockDimY << "," << data.blockDimZ << ","
+            << data.FLOPs << "," << data.FLOPsPerSecond
+            << std::endl;
+
+    csvFile.close();
+}
+
+std::string generateFileName(const KernelData& data) {
+    std::ostringstream filename;
+    filename << "matrix_mul_A" << data.rowsA << "x" << data.colsA
+             << "_B" << data.rowsB << "x" << data.colsB
+             << "_grid" << data.gridDimX << "x" << data.gridDimY
+             << "_block" << data.blockDimX << "x" << data.blockDimY
+             << ".csv";
+    return filename.str();
+}
+

@@ -1,6 +1,8 @@
 #include <cuda_runtime.h>
 #include <vector>
 #include "kernel_matrix_multiplication.cuh"
+#include "kernel_matrix_multiplication_data.cuh"
+#include "matrix_io.hpp"
 
 using namespace std;
 
@@ -35,6 +37,15 @@ void multiplyMatrices(vector<float> A_matrix,
     unsigned int B_matrix_dim = rowsB * colsB;
     unsigned int C_matrix_dim = rowsA * colsB;
 
+    // Crear los eventos para marcar el tiempo
+    cudaEvent_t start, stop;
+    cudaEventCreate(&start);
+    cudaEventCreate(&stop);
+
+    // Obtener la memoria libre antes de la ejecución del kernel
+    size_t freeMemBefore, totalMem;
+    cudaMemGetInfo(&freeMemBefore, &totalMem);
+
     // Reservar memoria en el dispositivo para las matrices A, B y C
     cudaMalloc(&dA_matrix, A_matrix_dim * sizeof(float));
     cudaMalloc(&dB_matrix, B_matrix_dim * sizeof(float));
@@ -44,24 +55,78 @@ void multiplyMatrices(vector<float> A_matrix,
     cudaMemcpy(dA_matrix, A_matrix.data(), A_matrix_dim * sizeof(float), cudaMemcpyHostToDevice);
     cudaMemcpy(dB_matrix, B_matrix.data(), B_matrix_dim * sizeof(float), cudaMemcpyHostToDevice);
 
-    // Configuración de la GRID y Block para el kernel
-    dim3 dimBlock(16, 16);
-    dim3 dimGrid(
-        ceil((colsA + dimBlock.x - 1) / dimBlock.x),
-        ceil((rowsB + dimBlock.y - 1) / dimBlock.y));
 
-    // Lanzar el kernel de multiplicación de matrices en el dispositivo
+    // Configuración de parametros de lanzamiento del Kernel
+    int blockDimX = 16;
+    int blockDimY = 16;
+
+    int gridDimX = ceil((colsA + blockDimX - 1) / blockDimX);
+    int gridDimY = ceil((rowsB + blockDimY - 1) / blockDimY);
+
+    dim3 dimBlock(blockDimX, blockDimY);
+    dim3 dimGrid(gridDimX, gridDimY);
+
+    // *________________________________________________________________________________________
+    // Marcar el inicio
+    cudaEventRecord(start);
+    // *Lanzamiento del kernel de multiplicación de matrices en el dispositivo
     matrixMulKernel<<<dimGrid, dimBlock>>>(dA_matrix, dB_matrix, dC_matrix, rowsA, colsA, colsB);
+    // *________________________________________________________________________________________
+    //! Comprobación de errores después del lanzamiento del kernel _____________________________
+    cudaError_t err = cudaGetLastError();
+    if (err != cudaSuccess) {
+        fprintf(stderr, "Error en el kernel: %s\n", cudaGetErrorString(err));
+    }
+    // !________________________________________________________________________________________
 
-    // Sincronizar el dispositivo para asegurarse de que la multiplicación haya terminado
+    // Marcar el evento de fin de cálculo (pero no necesariamente esperar a que termine aún)
+    cudaEventRecord(stop);
+
+    // Sincronizar el dispositivo para asegurarse de que el kernel y todas las operaciones anteriores hayan finalizado
     cudaDeviceSynchronize();
+
+    // Asegurarse de que el evento 'stop' esté completo antes de calcular el tiempo
+    cudaEventSynchronize(stop);
+
+    // Obtener la memoria libre después de la ejecución del kernel
+    size_t freeMemAfter;
+    cudaMemGetInfo(&freeMemAfter, &totalMem);
+
+    // Obtener el tiempo de ejecución
+    float milliseconds = 0;
+    cudaEventElapsedTime(&milliseconds, start, stop);
 
     // Copiar la matriz resultante C del dispositivo al host
     cudaMemcpy(hC_matrix, dC_matrix, rowsA * colsB * sizeof(float), cudaMemcpyDeviceToHost);
+
+    double FLOPs = 2.0 * rowsA * colsA * colsB;
+
+    // Llenar la estructura con los datos obtenidos
+    KernelData kernelData;
+    kernelData.executionTime = milliseconds;
+    kernelData.blockDimX = blockDimX;
+    kernelData.blockDimY = blockDimY;
+    kernelData.gridDimX = gridDimX;
+    kernelData.gridDimY = gridDimY;
+    kernelData.freeMemBefore = freeMemBefore;
+    kernelData.freeMemAfter = freeMemAfter;
+    kernelData.FLOPs = FLOPs;
+    kernelData.FLOPsPerSecond = FLOPs / (milliseconds / 1000.0);
+
+    // Llamar a la función del módulo matrix_io para escribir en el CSV
+    writeKernelDataToCSV(kernelData);
+
+    //* Rutinas de limpieza __________________________________________________
+
+    // Destruir eventos CUDA
+    cudaEventDestroy(start);
+    cudaEventDestroy(stop);
 
     // Liberar memoria
     cudaFree(dA_matrix);
     cudaFree(dB_matrix);
     cudaFree(dC_matrix);
     free(hC_matrix);
+    //* _______________________________________________________________________
+
 }
