@@ -103,6 +103,12 @@ void multiplyMatrices(vector<float> A_matrix,
 
     // Llenar la estructura con los datos obtenidos
     KernelData kernelData;
+    kernelData.rowsA = rowsA;
+    kernelData.colsA = colsA;
+    kernelData.rowsB = rowsB;
+    kernelData.colsB = colsB;
+    kernelData.rowsC = rowsA;
+    kernelData.colsC = colsB;
     kernelData.executionTime = milliseconds;
     kernelData.blockDimX = blockDimX;
     kernelData.blockDimY = blockDimY;
