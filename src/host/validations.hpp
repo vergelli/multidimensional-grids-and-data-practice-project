@@ -19,4 +19,18 @@
  */
 bool is_matrix_product_permitted(unsigned long long colsA, unsigned long long rowsB);
 
+/**
+ * @brief Checks if a file exists in the filesystem.
+ * 
+ * This function takes a file name as input and returns a boolean indicating
+ * whether the specified file exists. It uses the std::filesystem library to
+ * perform the existence check.
+ *
+ * @param fileName The name (and path) of the file to check.
+ * @return true If the file exists.
+ * @return false If the file does not exist.
+ */
+bool fileExists(const std::string& fileName);
+
+
 #endif // VALIDATIONS_HPP

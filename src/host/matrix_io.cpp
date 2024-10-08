@@ -6,11 +6,15 @@
  */
 
 #include "matrix_io.hpp"
+#include "validations.hpp"
+#include "config.hpp"
 #include <vector>
 #include <string>
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <filesystem>
+#include <iomanip>
 
 using namespace std;
 
@@ -61,21 +65,41 @@ std::pair<std::vector<float>, std::pair<size_t, size_t>> readMatrixFromFile(cons
 }
 
 
+std::filesystem::path generateFilePath(const std::string& fileName) {
+    // Crea la ruta completa utilizando el directorio de salida y el nombre del archivo
+    std::filesystem::path filePath = std::filesystem::path(METADATA_OUT_PATH) / fileName;
+
+    // Crea el directorio de salida si no existe
+    if (!std::filesystem::exists(filePath.parent_path())) {
+        std::filesystem::create_directories(filePath.parent_path());
+        std::cout << "Directory created: " << filePath.parent_path() << std::endl;
+    }
+
+    return filePath;
+}
+
 void writeKernelDataToCSV(const KernelData& data) {
     std::string fileName = generateFileName(data);
+    std::filesystem::path filePath = generateFilePath(fileName);
 
-    //TODO: Me lo esta guardando en la raiz, cuando deberia guardarlo en DATA.
+    // Verifica si el archivo existe y tiene un tamaño mayor a cero
+    bool fileHasData = std::filesystem::exists(filePath) && std::filesystem::file_size(filePath) > 0;
 
-    std::ofstream csvFile(fileName, std::ios::app); // Usa el nombre dinámico
+    std::ofstream csvFile(filePath, std::ios::out | std::ios::app);
+    if (!csvFile.is_open()) {
+        std::cerr << "Error opening file: " << filePath << std::endl;
+        return;
+    }
 
-    //TODO: Me esta escribiendo la cabecera cada vez que apendea una estructura.
-
-    // Si el archivo está vacío, escribe el encabezado
-    if (csvFile.tellp() == 0) {
+    // Solo escribe el encabezado si el archivo está vacío
+    if (!fileHasData) {
         csvFile << "A_matrix_rows,A_matrix_cols,B_matrix_rows,B_matrix_cols,"
                 << "C_matrix_rows,C_matrix_cols,exec_time_ms,"
                 << "free_mem_MB_before,free_mem_MB_after,"
                 << "gridDimX,gridDimY,gridDimZ,blockDimX,blockDimY,blockDimZ,FLOPs,FLOPs_per_second" << std::endl;
+        std::cout << "Header written to the CSV file." << std::endl;
+    } else {
+        std::cout << "File already contains data, header not written." << std::endl;
     }
 
     // Escribe los datos del kernel en el archivo CSV
@@ -83,12 +107,12 @@ void writeKernelDataToCSV(const KernelData& data) {
             << data.rowsB << "," << data.colsB << ","
             << data.rowsC << "," << data.colsC << ","
             << data.executionTime << ","
-            << data.freeMemBefore / (1024.0 * 1024.0) << "," // Convierte bytes a MB
+            << data.freeMemBefore / (1024.0 * 1024.0) << ","
             << data.freeMemAfter / (1024.0 * 1024.0) << ","
             << data.gridDimX << "," << data.gridDimY << "," << data.gridDimZ << ","
             << data.blockDimX << "," << data.blockDimY << "," << data.blockDimZ << ","
-            << data.FLOPs << "," << data.FLOPsPerSecond
-            << std::endl;
+            << std::fixed << std::setprecision(0) << data.FLOPs << ","
+            << std::fixed << std::setprecision(0) << data.FLOPsPerSecond << std::endl;
 
     csvFile.close();
 }

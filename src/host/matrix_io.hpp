@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <string>
+#include <filesystem>
 #include "kernel_matrix_multiplication_data.cuh"
 
 /**
@@ -42,5 +43,8 @@ void writeKernelDataToCSV(const KernelData& data);
  * @return std::string El nombre del archivo generado.
  */
 std::string generateFileName(const KernelData& data);
+
+
+std::filesystem::path generateFilePath(const std::string& fileName);
 
 #endif // MATRIX_IO_HPP
