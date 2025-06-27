@@ -1,44 +1,33 @@
-# Multidimensional Grids and Data - Practice Project 🟩
+# A Practice Project
 
-Repositorio de prácticas de **Multidimensional Grids and Data** Este repositorio está dedicado a los trabajos integradores y ejercicios prácticos que voy desarrollando durante la unidad correspondiente al capítulo 3 del libro *"Programming Massively Parallel Processors"*.
+Practice repository for multidimensional Grids and Data.
+This repo is dedicated to integrative tasks and hands-on exercises.
 
-## Descripción del Proyecto
+## Project Description
 
-Este proyecto se enfoca en la implementación de kernels CUDA para realizar operaciones matemáticas fundamentales en matrices y datos multidimensionales.
+This project focuses on implementing CUDA kernels to perform a basic matmul and multidimensional data.
 
-### Objetivos del Proyecto
+## Requirements
 
-1. Implementar y optimizar kernels CUDA para operaciones con matrices.
-2. Aplicar conceptos de paralelismo en GPU utilizando CUDA.
-3. Aprender conceptos generales de programacion en C++
-4. Integrar los resultados con programas C++ para ejecutar pruebas y validar los resultados.
-5. Desarrollar habilidades en la gestión de memoria y en el uso de grids multidimensionales.
-6. etc, etc, etc.
+To build and run this project, you'll need:
 
-## Requisitos
+* [CUDA Toolkit](https://developer.nvidia.com/cuda-downloads) (version 11 or higher)
+* [NVIDIA GPU](https://www.nvidia.com/en-us/geforce/) with **Compute Capability 8.0** (or higher)
+* A CUDA-compatible compiler like `nvcc`.
 
-Para compilar y ejecutar este proyecto necesitarás:
+## Installation
 
-- [CUDA Toolkit](https://developer.nvidia.com/cuda-downloads) (versión 11 o superior)
-- [NVIDIA GPU](https://www.nvidia.com/en-us/geforce/) con soporte para **Compute Capability 8.0** (o superior).
-- Un compilador compatible con CUDA como `nvcc`.
-
-## Instalación
-
-### 1. Clonar el repositorio
+### 1. Clone the repository
 
 ```bash
-git clone https://github.com/tuusuario/multidimensional-grids-and-data-practice-project.git
+git clone https://github.com/yourusername/multidimensional-grids-and-data-practice-project.git
 cd multidimensional-grids-and-data-practice-project
 ```
 
-## Uso
+## Usage
 
 **Windows**
-Ejecutar el archivo `compilation.bat`
+Run the `compilation.bat` file
 
 **Linux**
-Ya sabes que hacer
-
-Ejecutar archivo `./CUDA_matrix_multiplication`
-
+Was't the intention, but if you know what to do, it should be possible
